@@ -1,0 +1,30 @@
+#ifndef __MENU_ITEM_H
+#define __MENU_ITEM_H
+#include "widget.h"
+
+typedef struct
+{
+	widgetObj widget;
+	resID  image;
+	resID  selectImage;
+	uiColor color;
+	uiColor selectColor;
+	winHandle hImage;
+	winHandle hStr;
+	strInfor inforSelect;//2022.03.31
+	strInfor inforUnselect;//2022.03.31
+	bool useInforSelect;//2022.03.31
+	bool select;
+	bool  initStrInfor;//2022.03.31
+	//bool  visible;
+}menuItemObj;
+
+winHandle menuItemCreate(int16 x0,int16 y0,uint16 width,uint16 height,winHandle parent,uint16 style,uint16 id);
+winHandle itemCreateMenuItem(int16 x0,int16 y0,uint16 width,uint16 height);
+
+
+
+
+
+
+#endif

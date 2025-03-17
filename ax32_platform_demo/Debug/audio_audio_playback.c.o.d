@@ -1,0 +1,480 @@
+Debug/audio_audio_playback.c.o: ../multimedia/audio/audio_playback.c \
+ ../multimedia/audio/../media.h ../multimedia/audio/../user_media.h \
+ ../multimedia/audio/../../hal/inc/hal.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/typedef.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_spr_defs.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax329x.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_cfg.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/../boot_config.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_sys.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_int.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_dma.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_wdt.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_gpio.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_uart.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_timer.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_tminf.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_spi.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_rtc.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_md.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_iic.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_dac.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_adc.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_sd.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_auadc.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_osd.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_lcd.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_csi.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_mjpeg.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_isp.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_usb.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_misc.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_crc.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_btuart.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_emi.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_pip.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_rotate.h \
+ ../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_osdcmp.h \
+ ../multimedia/audio/../../hal/inc/../../ax32_platform_demo/resource/r_palette.h \
+ ../multimedia/audio/../../hal/inc/hal_cfg.h \
+ ../multimedia/audio/../../hal/inc/hal_adc.h \
+ ../multimedia/audio/../../hal/inc/hal_csi.h \
+ ../multimedia/audio/../../hal/inc/hal_dac.h \
+ ../multimedia/audio/../../hal/inc/hal_eeprom.h \
+ ../multimedia/audio/../../hal/inc/hal_gpio.h \
+ ../multimedia/audio/../../hal/inc/hal_iic.h \
+ ../multimedia/audio/../../hal/inc/hal_lcdframe.h \
+ ../multimedia/audio/../../hal/inc/hal_lcd.h \
+ ../multimedia/audio/../../hal/inc/hal_md.h \
+ ../multimedia/audio/../../hal/inc/hal_osd.h \
+ ../multimedia/audio/../../hal/inc/hal_rtc.h \
+ ../multimedia/audio/../../hal/inc/hal_sd.h \
+ ../multimedia/audio/../../hal/inc/hal_spi.h \
+ ../multimedia/audio/../../hal/inc/hal_timer.h \
+ ../multimedia/audio/../../hal/inc/hal_uart.h \
+ ../multimedia/audio/../../hal/inc/hal_watermark.h \
+ ../multimedia/audio/../../hal/inc/hal_auadc.h \
+ ../multimedia/audio/../../hal/inc/hal_mjpeg.h \
+ ../multimedia/audio/../../hal/inc/hal_wdt.h \
+ ../multimedia/audio/../../hal/inc/hal_int.h \
+ ../multimedia/audio/../../hal/inc/hal_stream.h \
+ ../multimedia/audio/../../hal/inc/hal_emi.h \
+ ../multimedia/audio/../../hal/inc/hal_osdcmp.h \
+ ../multimedia/audio/../../hal/inc/hal_rotate.h \
+ ../multimedia/audio/../../hal/inc/../isp/hal_isp.h \
+ ../multimedia/audio/../../hal/inc/../dusb/hal_usb_api.h \
+ ../multimedia/audio/../../hal/inc/../dusb/hal_usb_dev_enum.h \
+ ../multimedia/audio/../../hal/inc/../dusb/hal_usb_msc.h \
+ ../multimedia/audio/../../hal/inc/../dusb/hal_usb_uac.h \
+ ../multimedia/audio/../../hal/inc/../dusb/hal_usb_uvc.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_api.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_tpbulk.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_uvc.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_enum.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_tpbulk.h \
+ ../multimedia/audio/../../hal/inc/../husb/hal_usb_host_uvc.h \
+ ../multimedia/audio/../../hal/inc/hal_sys.h \
+ ../multimedia/audio/../../bwlib/bwlib.h \
+ ../multimedia/audio/../../bwlib/../hal/inc/hal.h \
+ ../multimedia/audio/../../bwlib/./nvfs/nvfs.h \
+ ../multimedia/audio/../../bwlib/./fs/inc/fs.h \
+ ../multimedia/audio/../../bwlib/./fs/inc/ffconf.h \
+ ../multimedia/audio/../../bwlib/./fs/inc/ff.h \
+ ../multimedia/audio/../../bwlib/./fs/inc/integer.h \
+ ../multimedia/audio/../../bwlib/./fs/inc/../../../hal/inc/hal.h \
+ ../multimedia/audio/../../bwlib/./maxlib/maxlib.h \
+ ../multimedia/audio/../../bwlib/./maxlib/max.h \
+ ../multimedia/audio/../../bwlib/./maxlib/../../hal/inc/hal.h \
+ ../multimedia/audio/../../bwlib/./maxlib/maxlib_config.h \
+ ../multimedia/audio/../../bwlib/./maxlib/max_user.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./std/misc.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./std/./../max.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./std/str.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./std/std_math.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./res/R.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./res/R_icon.h \
+ ../multimedia/audio/../../bwlib/./maxlib/./res/R_string.h \
+ ../multimedia/audio/../../xos/xos.h ../multimedia/audio/../../xos/xdef.h \
+ ../multimedia/audio/../../xos/xcfg.h \
+ ../multimedia/audio/../../xos/xerr.h \
+ ../multimedia/audio/../../xos/x_cpu.h \
+ ../multimedia/audio/../../xos/../ax32xx/inc/typedef.h \
+ ../multimedia/audio/../../xos/xmsgq.h \
+ ../multimedia/audio/../../xos/xmbox.h \
+ ../multimedia/audio/../../xos/xwork.h \
+ ../multimedia/audio/../multimedia.h ../multimedia/audio/../media.h \
+ ../multimedia/audio/../avi/inc/avi_api.h \
+ ../multimedia/audio/../avi/inc/avi_error.h \
+ ../multimedia/audio/../wav/wav.h \
+ ../multimedia/audio/../audio/ring_buffer.h \
+ ../multimedia/audio/../audio/audio_record.h \
+ ../multimedia/audio/../audio/../media.h \
+ ../multimedia/audio/../audio/audio_playback.h \
+ ../multimedia/audio/../video/video_record.h \
+ ../multimedia/audio/../video/video_playback.h \
+ ../multimedia/audio/../image/image_encode.h \
+ ../multimedia/audio/../image/image_decode.h \
+ ../multimedia/audio/../stream/stream.h \
+ ../multimedia/audio/../stream/log.h inc/customer.h application.h \
+ ../hal/inc/hal.h ../bwlib/bwlib.h ../xos/xos.h \
+ ../device/gsensor/gsensor.h ../device/gsensor/../../hal/inc/hal.h \
+ ../device/gsensor/../../xos/xos.h ../device/tft_lcd/tft_lcd.h \
+ ../device/tft_lcd/../../hal/inc/hal.h \
+ ../device/cmos_sensor/cmos_sensor.h \
+ ../device/cmos_sensor/../../hal/inc/hal.h ../device/tft_lcd/tft_lcd.h \
+ ../multimedia/multimedia.h inc/customer.h inc/resource_manager.h \
+ inc/config.h inc/board.h inc/display.h resource/resource.h \
+ resource/res.h resource/user_icon.h resource/user_str.h \
+ resource/r_palette.h inc/font.h inc/icon.h taskManage.h uiWin.h \
+ ../sUI/sUI.h ../sUI/button.h ../sUI/widget.h ../sUI/winManage.h \
+ ../sUI/mType.h ../sUI/../hal/inc/hal.h ../sUI/debug.h \
+ ../sUI/../ax32xx/inc/typedef.h ../sUI/userDef.h ../sUI/memPool.h \
+ ../sUI/uiAlloc.h ../sUI/dialog.h ../sUI/frameWin.h ../sUI/imageIcon.h \
+ ../sUI/stringIcon.h ../sUI/rect.h ../sUI/itemManage.h ../sUI/menuItem.h \
+ ../sUI/menuOption.h ../sUI/progressBar.h ../sUI/menuItemEx.h \
+ application.h menu.h
+
+../multimedia/audio/../media.h:
+
+../multimedia/audio/../user_media.h:
+
+../multimedia/audio/../../hal/inc/hal.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/typedef.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_spr_defs.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax329x.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_cfg.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/../boot_config.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_sys.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_int.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_dma.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_wdt.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_gpio.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_uart.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_timer.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_tminf.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_spi.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_rtc.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_md.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_iic.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_dac.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_adc.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_sd.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_auadc.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_osd.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_lcd.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_csi.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_mjpeg.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_isp.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_usb.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_misc.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_crc.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_btuart.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_emi.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_pip.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_rotate.h:
+
+../multimedia/audio/../../hal/inc/../../ax32xx/inc/ax32xx_osdcmp.h:
+
+../multimedia/audio/../../hal/inc/../../ax32_platform_demo/resource/r_palette.h:
+
+../multimedia/audio/../../hal/inc/hal_cfg.h:
+
+../multimedia/audio/../../hal/inc/hal_adc.h:
+
+../multimedia/audio/../../hal/inc/hal_csi.h:
+
+../multimedia/audio/../../hal/inc/hal_dac.h:
+
+../multimedia/audio/../../hal/inc/hal_eeprom.h:
+
+../multimedia/audio/../../hal/inc/hal_gpio.h:
+
+../multimedia/audio/../../hal/inc/hal_iic.h:
+
+../multimedia/audio/../../hal/inc/hal_lcdframe.h:
+
+../multimedia/audio/../../hal/inc/hal_lcd.h:
+
+../multimedia/audio/../../hal/inc/hal_md.h:
+
+../multimedia/audio/../../hal/inc/hal_osd.h:
+
+../multimedia/audio/../../hal/inc/hal_rtc.h:
+
+../multimedia/audio/../../hal/inc/hal_sd.h:
+
+../multimedia/audio/../../hal/inc/hal_spi.h:
+
+../multimedia/audio/../../hal/inc/hal_timer.h:
+
+../multimedia/audio/../../hal/inc/hal_uart.h:
+
+../multimedia/audio/../../hal/inc/hal_watermark.h:
+
+../multimedia/audio/../../hal/inc/hal_auadc.h:
+
+../multimedia/audio/../../hal/inc/hal_mjpeg.h:
+
+../multimedia/audio/../../hal/inc/hal_wdt.h:
+
+../multimedia/audio/../../hal/inc/hal_int.h:
+
+../multimedia/audio/../../hal/inc/hal_stream.h:
+
+../multimedia/audio/../../hal/inc/hal_emi.h:
+
+../multimedia/audio/../../hal/inc/hal_osdcmp.h:
+
+../multimedia/audio/../../hal/inc/hal_rotate.h:
+
+../multimedia/audio/../../hal/inc/../isp/hal_isp.h:
+
+../multimedia/audio/../../hal/inc/../dusb/hal_usb_api.h:
+
+../multimedia/audio/../../hal/inc/../dusb/hal_usb_dev_enum.h:
+
+../multimedia/audio/../../hal/inc/../dusb/hal_usb_msc.h:
+
+../multimedia/audio/../../hal/inc/../dusb/hal_usb_uac.h:
+
+../multimedia/audio/../../hal/inc/../dusb/hal_usb_uvc.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_api.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_tpbulk.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_uvc.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_enum.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_tpbulk.h:
+
+../multimedia/audio/../../hal/inc/../husb/hal_usb_host_uvc.h:
+
+../multimedia/audio/../../hal/inc/hal_sys.h:
+
+../multimedia/audio/../../bwlib/bwlib.h:
+
+../multimedia/audio/../../bwlib/../hal/inc/hal.h:
+
+../multimedia/audio/../../bwlib/./nvfs/nvfs.h:
+
+../multimedia/audio/../../bwlib/./fs/inc/fs.h:
+
+../multimedia/audio/../../bwlib/./fs/inc/ffconf.h:
+
+../multimedia/audio/../../bwlib/./fs/inc/ff.h:
+
+../multimedia/audio/../../bwlib/./fs/inc/integer.h:
+
+../multimedia/audio/../../bwlib/./fs/inc/../../../hal/inc/hal.h:
+
+../multimedia/audio/../../bwlib/./maxlib/maxlib.h:
+
+../multimedia/audio/../../bwlib/./maxlib/max.h:
+
+../multimedia/audio/../../bwlib/./maxlib/../../hal/inc/hal.h:
+
+../multimedia/audio/../../bwlib/./maxlib/maxlib_config.h:
+
+../multimedia/audio/../../bwlib/./maxlib/max_user.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./std/misc.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./std/./../max.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./std/str.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./std/std_math.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./res/R.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./res/R_icon.h:
+
+../multimedia/audio/../../bwlib/./maxlib/./res/R_string.h:
+
+../multimedia/audio/../../xos/xos.h:
+
+../multimedia/audio/../../xos/xdef.h:
+
+../multimedia/audio/../../xos/xcfg.h:
+
+../multimedia/audio/../../xos/xerr.h:
+
+../multimedia/audio/../../xos/x_cpu.h:
+
+../multimedia/audio/../../xos/../ax32xx/inc/typedef.h:
+
+../multimedia/audio/../../xos/xmsgq.h:
+
+../multimedia/audio/../../xos/xmbox.h:
+
+../multimedia/audio/../../xos/xwork.h:
+
+../multimedia/audio/../multimedia.h:
+
+../multimedia/audio/../media.h:
+
+../multimedia/audio/../avi/inc/avi_api.h:
+
+../multimedia/audio/../avi/inc/avi_error.h:
+
+../multimedia/audio/../wav/wav.h:
+
+../multimedia/audio/../audio/ring_buffer.h:
+
+../multimedia/audio/../audio/audio_record.h:
+
+../multimedia/audio/../audio/../media.h:
+
+../multimedia/audio/../audio/audio_playback.h:
+
+../multimedia/audio/../video/video_record.h:
+
+../multimedia/audio/../video/video_playback.h:
+
+../multimedia/audio/../image/image_encode.h:
+
+../multimedia/audio/../image/image_decode.h:
+
+../multimedia/audio/../stream/stream.h:
+
+../multimedia/audio/../stream/log.h:
+
+inc/customer.h:
+
+application.h:
+
+../hal/inc/hal.h:
+
+../bwlib/bwlib.h:
+
+../xos/xos.h:
+
+../device/gsensor/gsensor.h:
+
+../device/gsensor/../../hal/inc/hal.h:
+
+../device/gsensor/../../xos/xos.h:
+
+../device/tft_lcd/tft_lcd.h:
+
+../device/tft_lcd/../../hal/inc/hal.h:
+
+../device/cmos_sensor/cmos_sensor.h:
+
+../device/cmos_sensor/../../hal/inc/hal.h:
+
+../device/tft_lcd/tft_lcd.h:
+
+../multimedia/multimedia.h:
+
+inc/customer.h:
+
+inc/resource_manager.h:
+
+inc/config.h:
+
+inc/board.h:
+
+inc/display.h:
+
+resource/resource.h:
+
+resource/res.h:
+
+resource/user_icon.h:
+
+resource/user_str.h:
+
+resource/r_palette.h:
+
+inc/font.h:
+
+inc/icon.h:
+
+taskManage.h:
+
+uiWin.h:
+
+../sUI/sUI.h:
+
+../sUI/button.h:
+
+../sUI/widget.h:
+
+../sUI/winManage.h:
+
+../sUI/mType.h:
+
+../sUI/../hal/inc/hal.h:
+
+../sUI/debug.h:
+
+../sUI/../ax32xx/inc/typedef.h:
+
+../sUI/userDef.h:
+
+../sUI/memPool.h:
+
+../sUI/uiAlloc.h:
+
+../sUI/dialog.h:
+
+../sUI/frameWin.h:
+
+../sUI/imageIcon.h:
+
+../sUI/stringIcon.h:
+
+../sUI/rect.h:
+
+../sUI/itemManage.h:
+
+../sUI/menuItem.h:
+
+../sUI/menuOption.h:
+
+../sUI/progressBar.h:
+
+../sUI/menuItemEx.h:
+
+application.h:
+
+menu.h:
