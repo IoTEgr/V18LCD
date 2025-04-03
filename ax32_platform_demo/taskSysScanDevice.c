@@ -1254,7 +1254,7 @@ void deamon_usb_check(void)
 			SysCtrl.usb = USB_STAT_NULL; // dc out
 			checkStable = 5;			 // wait stable
 			usbdev = 0;
-			ax32xx_VDDGSENEnable(1);
+			// hal_vddGSENEnable(1);
 			usbdev_reset();
 			deg_Printf("usb out\n");
 			XMsgQPost(SysCtrl.sysQ, (void *)makeEvent(SYS_EVENT_USB, SysCtrl.usb));
@@ -1276,7 +1276,6 @@ void deamon_usb_check(void)
 			}
 
 			SysCtrl.usb = USB_STAT_DCIN;
-			ax32xx_VDDGSENEnable(1);
 			SysCtrl.battery = lastBatLevel = BATTERY_STAT_5;
 			XMsgQPost(SysCtrl.sysQ, (void *)makeEvent(SYS_EVENT_USB, SysCtrl.usb));
 			nopower = 0;
@@ -1287,12 +1286,11 @@ void deamon_usb_check(void)
 			{
 				SysCtrl.usb = USB_STAT_PC;
 				usbdev = 1;
-				ax32xx_VDDGSENEnable(0);
+				hal_vddGSENEnable(0);
 				lastBatLevel = BATTERY_STAT_5;
 				XMsgQPost(SysCtrl.sysQ, (void *)makeEvent(SYS_EVENT_USB, SysCtrl.usb));
 				// hal_usbdUninit();
 			}
-
 			// deg_Printf("-----BAT_CHARGE_CHECK()=%d-------.\n",BAT_CHARGE_CHECK());
 			if (BAT_CHARGE_CHECK()) // bat full
 			{
@@ -1303,6 +1301,7 @@ void deamon_usb_check(void)
 	//----------------------battery detect---------------------------------------
 	if (SysCtrl.usb == USB_STAT_NULL) // only dc out check battery
 	{
+		// hal_vddGSENEnable(1);
 		checkTime--;
 		if (checkTime)
 			return;

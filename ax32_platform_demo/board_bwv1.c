@@ -494,7 +494,7 @@ static int board_gsensor_init(void)
 {
 	return 0;
 
-	hal_vddGSENEnable(1);
+	// hal_vddGSENEnable(1);
 	return gSensorInit();
 }
 
