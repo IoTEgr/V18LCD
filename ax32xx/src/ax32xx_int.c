@@ -25,38 +25,6 @@
 #define __except SECTION(".vector.text")
 #define __except_data SECTION(".vector.data")
 
-extern int _exception_vma;
-
-//__except_data static char str0[] = {"[exception_init]\r\n"};
-__except_data static char str1[] = {"[exception]\r\n"};
-__except_data static char str2[] = {"[except reset]\r\n"};
-__except_data static char str3[] = {"\xff\xff\xff\x00\xff\xff\xff"};
-__except_data static char str4[] = {"[low power]\r\n"};
-__except_data static char str5[] = {"[WDT RESET]\r\n"};
-
-__except_data u32 chip_vision;
-__except_data u32 sdr_tune_source;
-
-#define USE_PRESAVE_TUNE 1 // 是否保存第一次tune的值到irtc ram，以后读ram的值进行配置，加快开机
-#define DLL_TUN 0
-#define CLK_TUN 1
-// #define SDRAM_TUNE_SOURCE               CLK_TUN  //only METALFIX B1 can use DLL_TUN
-#define SDRTUN_DEBG 0
-
-#define CLKTUN_CONST (BIT(6) | BIT(13) | BIT(5) | BIT(12))
-#define CLKTUN_OUTPUT_POS 7
-#define CLKTUN_INPUT_POS 0
-
-#define DLLTUN_CH1_POS 25
-#define DLLTUN_CH2_POS 21
-#define DLLTUN_CONST ((0xf << DLLTUN_CH1_POS) | (0xf << DLLTUN_CH2_POS))
-
-// #define RTC_RD_RTCRAM    IRTRAM_RD_CMD
-// #define RTC_WR_RTCRAM    IRTRAM_WR_CMD
-#define HAL_TUNEVALUE_ADDR 16 // RTC RAM ADDR
-#define HAL_CRCCHECK_ADDR 20  // RTC RAM ADDR
-////////////////////////////////////////////////////////////////////////////////
-
 #define WTD_DIS() WDTCON = 0x5001D;
 #define exact_delay(r1, r2, t) asm( \
     "l.movhi   %0,  hi(%2)\n"       \
@@ -66,12 +34,9 @@ __except_data u32 sdr_tune_source;
     "l.sfeq    %0,%1\n"             \
     "l.bnf     0b\n"                \
     : "=r"(r1), "=r"(r2) : "i"(t));
-__except static void exception_delay(u32 cnt)
-{
-    int i, j;
-    exact_delay(i, j, cnt);
-    // while(cnt--) asm("l.nop");
-}
+// #define combo_delay(t)  do {volatile int i=(t)*10; while(i--)  WTD_DIS(); } while(0) //1us  96M
+// #define delay(n)    combo_delay(n)
+////////////////////////////////////////////////////////////////////////////////
 
 __except void _rtcRamWrite(u8 addr, u8 *buffer, u8 len)
 {
@@ -96,6 +61,7 @@ __except void _rtcRamWrite(u8 addr, u8 *buffer, u8 len)
 
     RTCCON &= ~(1 << 8); // CE DISABLE
 }
+
 __except void _rtcRamRead(u8 addr, u8 *buffer, u8 len)
 {
     int i;
@@ -119,6 +85,22 @@ __except void _rtcRamRead(u8 addr, u8 *buffer, u8 len)
     }
     RTCCON &= ~(1 << 8); // CE DISABLE
 }
+
+extern int _exception_vma;
+
+//__except_data static char str0[] = {"[exception_init]\r\n"};
+__except_data static char str1[] = {"[exception]\r\n"};
+__except_data static char str2[] = {"[except reset]\r\n"};
+__except_data static char str3[] = {"\xff\xff\xff\x00\xff\xff\xff"};
+__except_data static char str4[] = {"[low power]\r\n"};
+__except_data static char str5[] = {"[WDT RESET]\r\n"};
+__except static void exception_delay(u32 cnt)
+{
+    int i, j;
+    exact_delay(i, j, cnt);
+    // while(cnt--) asm("l.nop");
+}
+
 __except static u8 exception_irtc_read(u8 cmd)
 {
     RTCCON |= BIT(8) | BIT(6);
@@ -143,29 +125,7 @@ __except static void exception_irtc_write(u8 cmd, u8 data)
         ;
     RTCCON &= ~BIT(8);
 }
-__except void my_putchar(char c)
-{
-#if SDRTUN_DEBG
-    if ('\n' == c)
-    {
-        UART0DAT = 0x0D;
-        while ((UART0PND & 0x2) == 0)
-            ;
-        UART0PND |= BIT(1);
-        UART0DAT = 0x0A;
-        while ((UART0PND & 0x2) == 0)
-            ;
-        UART0PND |= BIT(1);
-    }
-    else
-    {
-        UART0DAT = c & 0xff;
-        while ((UART0PND & 0x2) == 0)
-            ;
-        UART0PND |= BIT(1);
-    }
-#endif
-}
+
 __except void exception_uart_puts(const char *str)
 {
 #if CFG_MCU_DBG_EN
@@ -179,14 +139,6 @@ __except void exception_uart_puts(const char *str)
 #endif
 }
 
-__except void my_memset(void *dst, u8 val, int cnt)
-{
-    u8 *pDstTemp = (u8 *)dst;
-    while (cnt--)
-    {
-        *pDstTemp++ = val;
-    }
-}
 #if 0
 __except void auto_flash_init(u32 u32SPIBaud,u8 bus_mode)
 {
@@ -221,18 +173,18 @@ __except void auto_flash_init(u32 u32SPIBaud,u8 bus_mode)
 					dummy = 0,dummy_en = 0;
     SPIFFACON = (dummy<<20)|//dummy bytes count(auto mode)--------
                 (2<<18)|//addr bytes count(auto mode)--------
-                (0<<14)|//mode bus width(auto mode)	√
-                (0<<12)|//cmd bus width(auto mode)	√
-                (0<<10)|//addr bus width(auto mode) √
-                ((bus_mode & 3)<<8)| //data bus width(auto mode) √
+                (0<<14)|//mode bus width(auto mode)	a??
+                (0<<12)|//cmd bus width(auto mode)	a??
+                (0<<10)|//addr bus width(auto mode) a??
+                ((bus_mode & 3)<<8)| //data bus width(auto mode) a??
                 (dummy_en<<6)| //dummy phase enable(auto mode)---------
                 (0<<5)| //mode phase enable(auto mode)------
                 (1<<4)| //cmd phase enable(auto mode)------
-                (0<<2)| //dma device en			DMA模式
-                (1<<1)| //cpu data en			数据模式
-                (1<<0); //cpu instruction en  	指令模式
+                (0<<2)| //dma device en			DMA?¨????
+                (1<<1)| //cpu data en			??°????¨????
+                (1<<0); //cpu instruction en  	?????¤?¨????
   
-    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)掩码--------
+    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)??????--------
     SPIFPAMSK = 0xfffffff;//address mask(psram,auto mode)
 
 	 *(u32 *)0x1000  = 0xaabbccd2;
@@ -266,47 +218,50 @@ __except void auto_flash_init(u32 u32SPIBaud,u8 bus_mode)
 //                (0<<8)| //write cmd(dma device,auto mode)
 //                (0<<0); //read cmd(dma device,auto mode)
 }
-
+#endif
 
 __except void memcpy_flash2psram(void *dst, void *src, int cnt)
 {
-	MCP0CON = BIT(3);   
-    MCP0CON = BIT(0); 	 
-	
-	MCP0SCADDR = (u32)src;
-	MCP0TGADDR = (u32)dst;
-	MCP0LENGTH = cnt-1;
-    
-	while(1){
-		if(MCP0CON & BIT(1)){
-			MCP0CON |= BIT(3);//clear dma_copy pengding
-			break;
-		}	
-	}
+    MCP0CON = BIT(3);
+    MCP0CON = BIT(0);
+
+    MCP0SCADDR = (u32)src;
+    MCP0TGADDR = (u32)dst;
+    MCP0LENGTH = cnt - 1;
+
+    while (1)
+    {
+        if (MCP0CON & BIT(1))
+        {
+            MCP0CON |= BIT(3); // clear dma_copy pengding
+            break;
+        }
+    }
 }
 
-typedef void (*func) (uint32_t addr, uint32_t secn, uint32_t secs, uint32_t cmd); 
+typedef void (*func)(uint32_t addr, uint32_t secn, uint32_t secs, uint32_t cmd);
 __except void flash_to_psram(void)
 {
 #if 1
 
-    PMAPCON1 |= (3<<20);
-    PAFMAP   |= /*(1<<11)|(1<<10)|(1<<8)|(1<<9)|*/(1<<6)|(1<<7);
-    //PADIR    &=~((1<<11)|(1<<10));       
-    PADIR    |= /*(1<<9)|(1<<8)|*/(1<<6)|(1<<7);
-    PAPU     |= /*(1<<9)|(1<<8)|*/(1<<6)|(1<<7);
-    
-    PEFMAP |= (1<<0);//psram_cs 
-    PEDIR  &= ~(1<<0);
+    PMAPCON1 |= (3 << 20);
+    PAFMAP |= /*(1<<11)|(1<<10)|(1<<8)|(1<<9)|*/ (1 << 6) | (1 << 7);
+    // PADIR    &=~((1<<11)|(1<<10));
+    PADIR |= /*(1<<9)|(1<<8)|*/ (1 << 6) | (1 << 7);
+    PAPU |= /*(1<<9)|(1<<8)|*/ (1 << 6) | (1 << 7);
 
-    func p1= 0x001012d0;
-    func p2= 0x00101a50;
+    PEFMAP |= (1 << 0); // psram_cs
+    PEDIR &= ~(1 << 0);
+
+    func p1 = 0x001012d0;
+    func p2 = 0x00101a50;
     uint32_t i;
-    for(i=0;i<0x345;i++){
+    for (i = 0; i < 0x345; i++)
+    {
         WDTCON = 0x500;
-        p1(0x4000,7+i,1,0);
+        p1(0x4000, 7 + i, 1, 0);
         WDTCON = 0x500;
-        p2(0x4000,(0x4000000>>9)+i,1,0);
+        p2(0x4000, (0x4000000 >> 9) + i, 1, 0);
         WDTCON = 0x500;
     }
 #endif
@@ -315,52 +270,53 @@ __except void flash_to_psram(void)
     SPIFGCON  |= (1<<1); //auto mode en ---------------
     SPIFFACON = (0<<20)|//dummy bytes count(auto mode)--------
                 (2<<18)|//addr bytes count(auto mode)--------
-                (0<<14)|//mode bus width(auto mode)	√
-                (0<<12)|//cmd bus width(auto mode)	√
-                (0<<10)|//addr bus width(auto mode) √
-                ((bus_mode & 3)<<8)| //data bus width(auto mode) √
+                (0<<14)|//mode bus width(auto mode)	a??
+                (0<<12)|//cmd bus width(auto mode)	a??
+                (0<<10)|//addr bus width(auto mode) a??
+                ((bus_mode & 3)<<8)| //data bus width(auto mode) a??
                 (0<<6)| //dummy phase enable(auto mode)---------
                 (0<<5)| //mode phase enable(auto mode)------
                 (1<<4)| //cmd phase enable(auto mode)------
-                (1<<2)| //dma device en			DMA模式
-                (0<<1)| //cpu data en			数据模式
-                (0<<0); //cpu instruction en  	指令模式
-    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)掩码--------
+                (1<<2)| //dma device en			DMA?¨????
+                (0<<1)| //cpu data en			??°????¨????
+                (0<<0); //cpu instruction en  	?????¤?¨????
+    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)??????--------
     SPIFFACMD = (0<<16)|//mode value(flash,auto mode)---------
                 (0x02<<8)| //write cmd(flash,auto mode)----------
                 (0x03<<0); //read cmd(flash,auto mode)----------
                 
     SPIFPACON = (0<<20)|//dummy bytes count(auto mode)--------
                 (2<<18)|//addr bytes count(auto mode)--------
-                (0<<14)|//mode bus width(auto mode)	√
-                (0<<12)|//cmd bus width(auto mode)	√
-                (0<<10)|//addr bus width(auto mode) √
-                ((bus_mode & 3)<<8)| //data bus width(auto mode) √
+                (0<<14)|//mode bus width(auto mode)	a??
+                (0<<12)|//cmd bus width(auto mode)	a??
+                (0<<10)|//addr bus width(auto mode) a??
+                ((bus_mode & 3)<<8)| //data bus width(auto mode) a??
                 (0<<6)| //dummy phase enable(auto mode)---------
                 (0<<5)| //mode phase enable(auto mode)------
                 (1<<4); //cmd phase enable(auto mode)------
 
                 
-    SPIFPAMSK = 0x01fffff;//address mask(flash,auto mode)掩码--------
+    SPIFPAMSK = 0x01fffff;//address mask(flash,auto mode)??????--------
     SPIFPACMD = (0<<16)|//mode value(flash,auto mode)---------
                 (0x02<<8)| //write cmd(flash,auto mode)----------
                 (0x03<<0); //read cmd(flash,auto mode)----------
                 
     memcpy_flash2psram(0x4000000, 0x6000000+(7<<9), (0x345<<9));
-#endif    
-}
 #endif
+}
+
 typedef void (*func1)(uint32_t addr, uint8 *s1, uint8_t s2);
 __except_data static u32 vbg_param;
 __except void exception_init(void)
 {
-    //    UART0DAT = 'e';
-    //    while((UART0PND & 0x2)==0);
-    //    UART0PND |= BIT(1);
+    UART0DAT = 'e';
+    while ((UART0PND & 0x2) == 0)
+        ;
+    UART0PND |= BIT(1);
 
     __intvct_adr__((u32)&_exception_vma);
 
-    // LVD电压1.8V
+    // LVD?”μ???1.8V
     LVDCON = (1 << 6) | (1 << 5) | (0 << 0);
 //    WDTCON = 0x500;
 //-----------------PMU-------------
@@ -373,9 +329,9 @@ __except void exception_init(void)
     if((rtc0 & (1<<5)) == 0)
         exception_irtc_write(IRTCON0_WR_CMD,rtc0|(1<<5));
 //	exception_delay(10);	
-	PMUREFVOL = vbg_param;//*(u32 *)(0x5000-140+0x30 + 4) & 0x3ff;//0x32a;//efuse读值？
-	PMUCON  = 71<<2;//(((APB_CLK/(2*baudrate) - 1) & 0x7F)<<2);	//2M,根据系统时钟修改。
-	PMUFSBAUD = 24*2*(((71) & 0x7F)+1);//fpga: baudrate*1/32;芯片：baudrate*1/24;
+	PMUREFVOL = vbg_param;//*(u32 *)(0x5000-140+0x30 + 4) & 0x3ff;//0x32a;//efuseèˉ??€????
+	PMUCON  = 71<<2;//(((APB_CLK/(2*baudrate) - 1) & 0x7F)<<2);	//2M,??1????3?????—?é’?????”1?€?
+	PMUFSBAUD = 24*2*(((71) & 0x7F)+1);//fpga: baudrate*1/32;è?ˉ?‰????baudrate*1/24;
 	PMUCON1 =(2<<5)/*|(2<<3)*/|(5<<0);	
 	//PMUCON1 =(5<<0);	
 	PMUBATHW  = 0x1388;//4.6v
@@ -387,18 +343,18 @@ __except void exception_init(void)
     //    SPIFGCON  |= (1<<1); //auto mode en ---------------
     //    SPIFFACON = (0<<20)|//dummy bytes count(auto mode)--------
     //                (2<<18)|//addr bytes count(auto mode)--------
-    //                (0<<14)|//mode bus width(auto mode)	√
-    //                (0<<12)|//cmd bus width(auto mode)	√
-    //                (0<<10)|//addr bus width(auto mode) √
-    //                ((0 & 3)<<8)| //data bus width(auto mode) √
+    //                (0<<14)|//mode bus width(auto mode)	a??
+    //                (0<<12)|//cmd bus width(auto mode)	a??
+    //                (0<<10)|//addr bus width(auto mode) a??
+    //                ((0 & 3)<<8)| //data bus width(auto mode) a??
     //                (0<<6)| //dummy phase enable(auto mode)---------
     //                (0<<5)| //mode phase enable(auto mode)------
     //                (1<<4)| //cmd phase enable(auto mode)------
-    //                (0<<2)| //dma device en			DMA模式
-    //                (1<<1)| //cpu data en			数据模式
-    //                (1<<0); //cpu instruction en  	指令模式
+    //                (0<<2)| //dma device en			DMA?¨????
+    //                (1<<1)| //cpu data en			??°????¨????
+    //                (1<<0); //cpu instruction en  	?????¤?¨????
 
-    //    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)掩码--------
+    //    SPIFFAMSK = 0x01fffff;//address mask(flash,auto mode)??????--------
     //    SPIFFACMD = (0<<16)|//mode value(flash,auto mode)---------
     //                (0x02<<8)| //write cmd(flash,auto mode)----------
     //                (0x03<<0); //read cmd(flash,auto mode)----------
@@ -428,14 +384,24 @@ __except void exception_init(void)
                  (1<<0); //cpu instruction en
 #endif
 
-    // uart tx pa7
+    // uart
+#if AX32_PLATFORM == FPGA
+    PMAPCON0 = (PMAPCON0 & ~0x3ff) | (9 << 5) | (6 << 0);
+    PBFMAP |= BIT(4) | BIT(0);
+    PBDIR |= BIT(4);
+    PBDIR &= ~BIT(0);
+#elif AX32_PLATFORM == AX3292 // uart tx pe1
+    PMAPCON0 = (PMAPCON0 & ~0x3ff) | (12 << 5); // PMAPCON0 = (PMAPCON0 & ~0x3ff)|(24<<5);
+    PBFMAP |= BIT(6);                           // PEFMAP   |= BIT(1);
+    PBDIR &= ~BIT(6);                           // PEDIR    &= ~BIT(1);
+#else                         // uart tx pa7
     PMAPCON0 = (PMAPCON0 & ~0x3ff) | (6 << 5);
     PAFMAP |= BIT(7);
     PADIR &= ~BIT(7);
-
+#endif
     UART0BAUD = APB_CLK / UART_BAUDRATE - 1; // baud rate
-    UART0PND |= BIT(5) | BIT(4);             // 清除标志位
-    UART0CON |= BIT(4);                      // 使能UART0
+    UART0PND |= BIT(5) | BIT(4);             //??…é?¤?????—???
+    UART0CON |= BIT(4);                      //???è??UART0
 }
 
 __except u32 ax32xx_vddrtcCalculate(u32 Artc, u32 Abg)
@@ -454,31 +420,96 @@ __except u32 ax32xx_vddrtcCalculate(u32 Artc, u32 Abg)
     return Vrtc;
 }
 
-// #define combo_delay(t)  do {volatile int i=(t)*10; while(i--)  WTD_DIS(); } while(0) //1us  96M
-// #define delay(n)    combo_delay(n)
+__except_data u32 chip_vision;
+__except_data u32 sdr_tune_source;
+#define DLL_TUN 0
+#define CLK_TUN 1
+// #define SDRAM_TUNE_SOURCE               CLK_TUN  //only METALFIX B1 can use DLL_TUN
+#define SDRTUN_DEBG 0
+
+#define CLKTUN_CONST (BIT(6) | BIT(13) | BIT(5) | BIT(12))
+#define CLKTUN_OUTPUT_POS 7
+#define CLKTUN_INPUT_POS 0
+
+#define DLLTUN_CH1_POS 25
+#define DLLTUN_CH2_POS 21
+#define DLLTUN_CONST ((0xf << DLLTUN_CH1_POS) | (0xf << DLLTUN_CH2_POS))
+
 ////////////////////////////////////////////////////////////////////////////////
+__except void my_memset(void *dst, u8 val, int cnt)
+{
+    u8 *pDstTemp = (u8 *)dst;
+    while (cnt--)
+    {
+        *pDstTemp++ = val;
+    }
+}
+
+__except void my_putchar(char c)
+{
+#if SDRTUN_DEBG
+    if ('\n' == c)
+    {
+        UART0DAT = 0x0D;
+        while ((UART0PND & 0x2) == 0)
+            ;
+        UART0PND |= BIT(1);
+        UART0DAT = 0x0A;
+        while ((UART0PND & 0x2) == 0)
+            ;
+        UART0PND |= BIT(1);
+    }
+    else
+    {
+        UART0DAT = c & 0xff;
+        while ((UART0PND & 0x2) == 0)
+            ;
+        UART0PND |= BIT(1);
+    }
+#endif
+}
+__except void myputs(char *str)
+{
+    while (*str)
+        my_putchar(*str++);
+
+    my_putchar('\n');
+}
+
+__except void my_putword(uint32_t val)
+{
+    static const char hex[16] = "0123456789ABCDEF";
+    int i;
+    for (i = 0; i < 8; ++i)
+    {
+        my_putchar(hex[val >> 28]);
+        val <<= 4;
+    }
+}
 
 __except void dllcon_init(void)
 {
 
-    // int i,j;
+    int i, j;
     if (chip_vision == THUNDERSE_A1)
     {
         LDOCON |= BIT(28);
         // DLLCON |= (BIT(10) | BIT(9)) ;    // LDOS sel ldo vol 11
-        DLLCON |= BIT(11);     // enable ldoen
-        exception_delay(2400); //(6*2400+5)*6.94ns(144M)=100us
-        DLLCON |= BIT(2);      // SEL VREF=VBG
-        DLLCON |= BIT(1);      // vcdlref=vtv
+        DLLCON |= BIT(11); // enable ldoen
+                           // exact_delay(i,j,2400);          //(6*2400+5)*6.94ns(144M)=100us
+        exception_delay(2400);
+        DLLCON |= BIT(2); // SEL VREF=VBG
+        DLLCON |= BIT(1); // vcdlref=vtv
 
         DLLCON |= BIT(19);                                // enable DLLEN
         DLLCON |= (BIT(15) | BIT(14) | BIT(13) | BIT(5)); // dll_freqs_12v 200M,111,  lowspeed
         DLLCON |= BIT(12);                                // ICPSEL 1:dcbias 0: selfbias,sel  dcbias
 
         // DLLCON |= BIT(17);  //DLL_FORCEALL
-        DLLCON |= BIT(16);     // DLL_Forceout
-        DLLCON |= BIT(4);      // DLL START
-        exception_delay(2400); //(6*2400+5)*6.94ns(144M)=100us
+        DLLCON |= BIT(16); // DLL_Forceout
+        DLLCON |= BIT(4);  // DLL START
+        // exact_delay(i,j,2400);  //(6*2400+5)*6.94ns(144M)=100us
+        exception_delay(2400);
 
         // exact_delay(i,j,240000);          //(6*2400+5)*6.94ns(144M)=10ms
         // while((DLLCON & BIT(0))==0);
@@ -497,10 +528,12 @@ __except void dllcon_init(void)
         // DLLCON |= BIT(9);  // ldos sel ldo vol
         DLLCON |= BIT(11); // enable ldoen
 
-        exception_delay(47); // delay 100us (161us)(107US)
+        // exact_delay(i,j,47);  //delay 100us (161us)(107US)
+        exception_delay(47);
         //  combo_delay(100);
 
         DLLCON |= BIT(19); // enable DLLEN
+        // exact_delay(i,j,10);
         exception_delay(10);
 
         DLLCON |= BIT(15); // dll_freqs_12v 200M,110
@@ -523,16 +556,20 @@ __except void dllcon_init(void)
 
         // DLLCON |= BIT(1); //VTBIAS 0:V TO IV BIAS 1: V TO V BIAS
 
+        // exact_delay(i,j,47);
         exception_delay(47);
         DLLCON |= BIT(4); // DLL START
 
-        exception_delay(10);   // delay 100ns
-        DLLCON |= BIT(18);     // flocken
-        exception_delay(2400); // delay 100us->200us 107us
-        DLLCON &= ~BIT(18);    // flocken DISABLE
+        // exact_delay(i,j,10);   //delay 100ns
+        exception_delay(10);
+        DLLCON |= BIT(18); // flocken
+        // exact_delay(i,j,2400) ; //delay 100us->200us 107us
+        exception_delay(2400);
+        DLLCON &= ~BIT(18); // flocken DISABLE
 
         // delay(100000);
         DLLCON |= BIT(8); // dll_lockdet
+        // exact_delay(i,j,2400) ;
         exception_delay(2400);
         while ((DLLCON & BIT(0)) == 0)
             ;
@@ -553,20 +590,16 @@ __except void dllcon_init(void)
 __except uint32_t sdram_init(void)
 {
 
-    int i;
-#if (SDRAM_SIZE_2M == SDRAM_SIZE)
-    SDRCON = 0x180 | (1 << 5); // param[0];
-#else
+    int i, j;
     SDRCON = 0x181 | (1 << 5); // param[0];
-#endif
-
-    SDRTM = 0x2297fbf5; // param[1];
+    SDRTM = 0x2297fbf5;        // param[1];
 
     asm("l.nop");
     asm("l.nop");
     asm("l.nop");
 
     SDRCON |= 0x80;
+    // exact_delay(i,j,200);
     exception_delay(200);
     // combo_delay(200);  //minimum 200us, should be 400us
 
@@ -659,9 +692,9 @@ __except s32 adcGetChannel(u8 ch)
     return adcRead();
 }
 
-/* 嘗試非常簡易的檢驗方法 */
+/* ??—è?|é??????°???“????a￠é?—?–1?3?*/
 ////////////////////////////////////////////////////////////////////////////////
-/* 嘗試非常簡易的檢驗方法 */
+/* ??—è?|é??????°???“????a￠é?—?–1?3?*/
 #define ADR(a) (((a) & adrmsk) + 0x02000000)
 #define ADDR0 0x55555554
 #define DATA0 0x33CCCC33
@@ -788,9 +821,9 @@ typedef struct tune_s
     struct
     {
         u8 index, cnt;
-    } value[5]; // 仅保存5组值,依据经验设置,虽然有局限性
-    u8 remain;  // value[]中剩余可用的元素数量
-    u8 cur;     // 当前可用的value[]的index
+    } value[5]; //??…????-?????€??????????éa?è?????,è???????‰?±€é???€?
+    u8 remain;  // value[]??-?‰??????ˉ?”¨????…??′???°é??
+    u8 cur;     //??“?‰???ˉ?”¨???value[]???index
 } tune_t;
 typedef struct slope_s
 {
@@ -832,12 +865,12 @@ __except_data u8 tune_tab_2_clk[] = // IN Y  b4_0_tab
 };
 
 // #else
-__except_data u8 tune_tab_1_dll[] = // 16 phase ：22.5/（0~360）
+__except_data u8 tune_tab_1_dll[] = // 16 phase ???2.5/???~360???
 
     {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-__except_data u8 tune_tab_2_dll[] = // 16 phase 22.5/（0~360）
+__except_data u8 tune_tab_2_dll[] = // 16 phase 22.5/???~360???
     {
 
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -845,8 +878,8 @@ __except_data u8 tune_tab_2_dll[] = // 16 phase 22.5/（0~360）
 
 // #endif
 
-__except_data tune_t tune_by;                                // 仅包含b11_7的tune信息 tune_b11_7
-__except_data tune_t tune_values[ARRAY_NUM(tune_tab_1_clk)]; // 包含所有的信息
+__except_data tune_t tune_by;                                //??…??…???b11_7???tune?????ˉ tune_b11_7
+__except_data tune_t tune_values[ARRAY_NUM(tune_tab_1_clk)]; //??…????‰€??‰????????ˉ
 
 __except void _sdr_tuning2_conifg_set(u32 sdrconfig)
 {
@@ -963,9 +996,9 @@ __except static void sdram_tuning_check_init(void)
         u32 temp;
         for (i = 0; i < ARRAY_NUM(tuning_test_addr); i++)
         {
-            temp = tuning_test_addr[i] & 0xFF1FFFFF; // 确保在2M范围内
+            temp = tuning_test_addr[i] & 0xFF1FFFFF; //?????????Mè????′???
             if ((temp & 0xFFFFF) > (0x100000 - 10 * 1024))
-                temp -= 10 * 1024; // 确保不能太靠近边界
+                temp -= 10 * 1024; //?????????è???¤aé??è?‘è?1???
             tuning_test_addr[i] = temp;
 
             // if(temp > (0x2000000 + 2 * 1024 * 1024 - 10 * 1024))
@@ -986,7 +1019,7 @@ __except static u8 tab_next_value(const u8 *tab, u32 tab_size, u32 start, s32 in
     return tab[tab_next_index(tab_size, start, interval)];
 }
 
-// 搜索tune到的值中cnt最大的
+//????′￠tune??°????€???-cnt??€?¤§???
 __except static void tune_values_max(const u8 *tab, u32 tab_size, tune_t *tune, u8 *index, u8 *cnt)
 {
     if (!tune->cur)
@@ -996,7 +1029,7 @@ __except static void tune_values_max(const u8 *tab, u32 tab_size, tune_t *tune, 
     u8 max_index = 0, max_cnt = 0;
 
 #define _tab_next(start, interval) tab_next_value(tab, tab_size, start, interval)
-    if (tune->cur > 1) // 至少要有两段
+    if (tune->cur > 1) // è?3?°‘è|???‰??¤??μ
     {
         u8 f_slice_index = tune->value[0].index; // first slice index
         u8 f_slice_cnt = tune->value[0].cnt;
@@ -1004,7 +1037,7 @@ __except static void tune_values_max(const u8 *tab, u32 tab_size, tune_t *tune, 
         u8 l_slice_cnt = tune->value[tune->cur - 1].cnt;
         u8 next = _tab_next(l_slice_index, l_slice_cnt);
 
-        if (next == tab[f_slice_index]) // 检查首尾是否是连在一起的
+        if (next == tab[f_slice_index]) //?￡€??￥é|–?°???ˉ??|??ˉè????¨??€èμ·???
         {
             max_index = l_slice_index;
             max_cnt = l_slice_cnt + f_slice_cnt;
@@ -1017,7 +1050,7 @@ __except static void tune_values_max(const u8 *tab, u32 tab_size, tune_t *tune, 
         if (tune->value[i].cnt > max_cnt)
         {
             max_cnt = tune->value[i].cnt;
-            max_index = tune->value[i].index; // 在tab中的index
+            max_index = tune->value[i].index; //??¨tab??-???index
         }
     }
 
@@ -1034,7 +1067,7 @@ __except static int tune_values_select(u8 *p_by_id, u8 *p_bx_id)
     if (!tune_by.cur)
     {
 
-        return -1; // 报错,让外部重新再tuning一次
+        return -1; //??￥é”?,è???¤–é?¨é???–°???tuning??€???
     }
 
     // if(re)
@@ -1053,17 +1086,17 @@ __except static int tune_values_select(u8 *p_by_id, u8 *p_bx_id)
     middle_indexs[2] = 1;
     middle_indexs[3] = -2;
     middle_indexs[4] = 2;
-    // 1.选出tune_tab_1中最连续的区间
+    // 1.é€‰??otune_tab_1??-??€è????-?????oé—?
     if (sdr_tune_source == CLK_TUN)
         tune_values_max(tune_tab_1_clk, ARRAY_NUM(tune_tab_1_clk), &tune_by, &max_index[0], &max_cnt[0]);
     else
         tune_values_max(tune_tab_1_dll, ARRAY_NUM(tune_tab_1_dll), &tune_by, &max_index[0], &max_cnt[0]);
     if (max_cnt[0] < min_cnt)
     {
-        return -1; // 报错,让外部重新再tuning一次
+        return -1; //??￥é”?,è???¤–é?¨é???–°???tuning??€???
     }
 
-    // 2.找到该区间的中部
+    // 2.?‰???°èˉ￥??oé—′?????-é?¨
     if (sdr_tune_source == CLK_TUN)
         middle_index = tab_next_index(ARRAY_NUM(tune_tab_1_clk), max_index[0], max_cnt[0] / 2); // OUTPUT
     else
@@ -1081,7 +1114,7 @@ __except static int tune_values_select(u8 *p_by_id, u8 *p_bx_id)
         middle_indexs_cnt = 1;
     }
 
-    // 3.从中部选出bit[4:0]最连续的
+    // 3.?????-é?¨é€‰??obit[4:0]??€è????-???
 
     u8 id_temp, cnt_temp, by_id;
     u32 i;
@@ -1103,9 +1136,9 @@ __except static int tune_values_select(u8 *p_by_id, u8 *p_bx_id)
 
         if (cnt_temp > max_cnt[1])
         {
-            max_cnt[1] = cnt_temp;  // 最佳的tune value在b4_0_tab中的连续数目
-            max_index[1] = id_temp; // 最佳的tune value在b4_0_tab中的起始index
-            max_index[0] = by_id;   // 最佳的tune value在b11_7_tab中的index
+            max_cnt[1] = cnt_temp;  //??€??3???tune value??¨b4_0_tab??-???è????-??°???
+            max_index[1] = id_temp; //??€??3???tune value??¨b4_0_tab??-???èμ·?§?index
+            max_index[0] = by_id;   //??€??3???tune value??¨b11_7_tab??-???index
         }
     }
     if (sdr_tune_source == CLK_TUN)
@@ -1120,7 +1153,193 @@ __except static int tune_values_select(u8 *p_by_id, u8 *p_bx_id)
 
     return 0;
 }
+//---------------------------------------------------------
+#if 0
 
+typedef  void (* func_init_pll )(void *);
+#define clr_wdt() WDTCON = 0x5003d
+#define soft_delay(t)             \
+    do                            \
+    {                             \
+        volatile int i = (t) * 2; \
+        while (i--)               \
+            ;                     \
+        clr_wdt();                \
+    } while (0) // 10us RC 2M
+
+
+__except bool check_if_xosc_exist(void)
+{	
+    u32 i;
+	CLKCON0 |= BIT(24); //Timer 32kHz signal source sel : 0:from RC2M; 1:xosc32k 
+	TMR0CON = (7<<8) ;
+	TMR0PR = 32768/2 -1; 
+	TMR0CNT = 0; 
+	TMR0CON |= BIT(0); //enable and work on the Counter Mode
+
+	for(i = 0; i < 0xffff; i++)
+	{
+		if(TMR0CNT > 16)
+		{
+			//test_dbg_putstr("xosc!\n");
+            for(i = 0; i < 20; i++)
+			{
+                TMR0CNT = 0;
+                soft_delay(14000);         //50ms RC 2.4M
+                if(TMR0CNT > 600)
+				{
+                    //test_dbg_putstr("check if xosc ok!\n");
+                    return true;	
+                }	
+            }
+			return true;	
+		}	
+	}
+	//test_dbg_putstr("no xosc!\n");
+	return false;
+  /**/  
+}
+
+__except bool init_sys_clk(void)
+{
+	bool if_xosc_exist = check_if_xosc_exist();
+    u32 rc10M_turn = ((*(u32 *)0x4fa8)& 0xfffc00)>>10; 	
+	u8 use_rc = 0;
+
+    if(if_xosc_exist)
+	{
+        func_init_pll init_pll1 = 0x00104424; 
+        u16 param[4]; //= {132000000/32768, (132000000%32768)*2, 0,  264000000/132000000-1};
+        //prevent complier from using memcpy
+        param[0] = COMBO_CLOCK/32768;
+        param[1] = (COMBO_CLOCK%32768)*2;
+        param[2] = 0;
+        param[3] = (COMBO_CLOCK*2)/COMBO_CLOCK-1;
+       
+        init_pll1(param);  
+        //test_dbg_putstr ("32k\r\n"); 
+        
+        PLL1DIV = ((200000000/32768)<<16)|((200000000%32768)*2);
+        PLL1CON = 0x1323;
+        SDRACON0 = 0x3ff;
+        CLKCON1 = (CLKCON1 &~ (7<<5))|(1<<5);   //ddr pll divide
+        CLKCON0 = (CLKCON0 &~ (1<<22))|(1<<23);  //0:ddrpll 1:syspll
+
+	   	{//print only for test 
+	        UART0BAUD = COMBO_CLOCK/115200 -1;
+	        while((UART0PND & 0x2)==0);
+	        UART0PND |= BIT(1);  
+	        UART0DAT = 'b'; 
+	   	}
+
+		//======write flag to rtc ram====
+		{
+			volatile int timeout = 0x8000;
+			use_rc = 0xAA;
+
+			RTCCON |= (1<<8);		 //CE ENABLE 
+			timeout = 0x8000;
+			RTCDATA = IRTRAM_WR_CMD;	// W CMD
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			timeout = 0x8000;
+			RTCDATA = 8;				//W addr
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			timeout = 0x8000;
+			RTCDATA = use_rc;		//W data
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			RTCCON &= ~(1<<8);		 //CE DISABLE	
+		}
+
+    }
+	else
+	{
+        if(rc10M_turn == 0)
+        {
+            //rc10M_turn = 10000;
+            //===NO 32K XOS,  IC not RC10M check ,can't run!!!
+            while(1);
+        }
+ 
+        CLKCON2 |= (1<<16);  //RC10M enable, delay 100us
+        CLKCON0 |= BIT(3);   //RC select RC10M;rc sel:00:rc2M ,10:RC10M
+        soft_delay(1);
+        CLKCON0 &= ~(BIT(1)|BIT(0)); //system clk choose RC     
+
+        PLL0DIV  = (COMBO_CLOCK/1000/rc10M_turn)<<16;
+        PLL0DIV  |= (COMBO_CLOCK%rc10M_turn)*65536/rc10M_turn;
+        PLL0CON = 0x10e7;
+        CLKCON1 = (COMBO_CLOCK*2)/COMBO_CLOCK-1;
+        // ?μ???′???–???‰??1mS 
+        soft_delay (100);
+        // ???μ??ya€￠r?§??????RC????a€?Q?μ??PLL, CLKCON0[1:0]=?·?–??l?￡?o0b11?￡???2???·?–??l?￡?o0x10
+        CLKCON0 |= ((COMBO_CLOCK*2)/COMBO_CLOCK-1)?3:2;
+        //test_dbg_putstr ("rc10M_turn\r\n");  
+        
+        PLL1DIV  = (200000/rc10M_turn)<<16;
+        PLL1DIV  |= (200000%rc10M_turn)*65536/rc10M_turn;
+        PLL1CON = 0x13e7;
+        SDRACON0 = 0x3ff;
+        CLKCON1 = (CLKCON1 &~ (7<<5))|(1<<5);   //ddr pll divide
+        CLKCON0 = (CLKCON0 &~ (1<<22))|(1<<23);  //0:ddrpll 1:syspll
+
+		{//print only for test 
+	        UART0BAUD = COMBO_CLOCK/115200 -1;
+	        while((UART0PND & 0x2)==0);
+	        UART0PND |= BIT(1);  
+	        UART0DAT = 'c'; 
+		}
+		//======write flag to rtc ram====
+		{
+			volatile int timeout = 0x8000;
+
+			RTCCON |= (1<<8);		 //CE ENABLE 
+			timeout = 0x8000;
+			RTCDATA = IRTRAM_WR_CMD;	// W CMD
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			timeout = 0x8000;
+			RTCDATA = 8;				//W addr
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			timeout = 0x8000;
+			RTCDATA = use_rc;		//W data
+			while(RTCCON & (1<<3))
+			{
+				timeout--;
+				if(timeout==0)
+					break;
+			}
+			RTCCON &= ~(1<<8);		 //CE DISABLE	
+		}
+
+    }
+    
+}
+#endif
+//---------------------------------------------------------------
 #define CRC8_ALPHA 0x31 // x^8+x^5+x^4+1
 __except u32 crc_cal(u32 data)
 {
@@ -1130,27 +1349,30 @@ __except u32 crc_cal(u32 data)
     u8 i = 0, j = 0;
     for (i = 0; i < 4; i++)
     {
-        temp = (u8)((data >> (i << 3)) & 0xff); // 从低字节开始进行crc计算
-        /*数据往左移了8位，需要计算8次*/
+        temp = (u8)((data >> (i << 3)) & 0xff); //???????-—è????€?§?è??è??crcè????—
+        /*??°?????€?·|?§??o???????é?€è|?è????????*/
         for (j = 8; j > 0; --j)
         {
             WTD_DIS();
-            if (temp & 0x80) // 判断最高位是否为1
+            if (temp & 0x80) //??¤?–-??€é???????ˉ??|???
                 temp = (temp << 1) ^ crc8;
             else
                 temp = temp << 1;
         }
-        crc_reg |= (temp << (i << 3)); // 将计算的crc值存回crc_reg中
+        crc_reg |= (temp << (i << 3)); //?°?è????—???crc?€??-????crc_reg???
     }
     return crc_reg;
 }
 
 __except void sdram_clock_tune(void) // clktun
 {
-
-    // int r1,r2;
+#if KEY_PRESSED_POWER_TAP
+    exception_irtc_write(IRTCON4_WR_CMD, (7 << 1)); // wko output 1
+#endif
+    int r1, r2;
     LDOCON = (LDOCON & ~(0x03 << 13)) | ((SYS_VOL_V1_25 & 0x03) << 13); // LDO 1.2V; 0:1.0V, 1: 1.2V, 2: 1.25V, 3: 1.3V
     // delay(20);
+    // exact_delay(r1,r2,20);
     exception_delay(20);
     //	uint32_t mid;
 
@@ -1167,25 +1389,16 @@ __except void sdram_clock_tune(void) // clktun
     u8 vbg_ofs = (*(u32 *)(0x5000 - 140 + 0x30 + 4) & 0x7f);
     if (vbg_ofs != 0)
     {
-        // vbg_param = vbg_ofs +737;
-        if (vbg_trim != 0)
-        {
-            vbg_param = (vbg_trim * 31) / 10 + 755;
-        }
-        else
-        {
-            vbg_param = 800;
-        }
+        vbg_param = vbg_ofs + 737;
     }
     else
     {
         vbg_param = 800;
     }
-
     // LDOCON |= (0xF<<16);//bandgap voltage select (3<<12)
-#if 1 // DLL打开前打开后测量1次
-    //	u16 vbg_adc0,vbg_adc1;
-    //	vbg_adc0 = adcGetChannel(11);//adc0
+#if 1 // DLL?‰“??€?‰??‰“??€????μ?é?????
+    u16 vbg_adc0, vbg_adc1;
+    vbg_adc0 = adcGetChannel(11); // adc0
 #endif
 
     //-------------read chip id
@@ -1207,36 +1420,42 @@ __except void sdram_clock_tune(void) // clktun
         DLLCON = 0;
     }
     // delay(200);
+    // exact_delay(r1,r2,200);
     exception_delay(200);
     SPR_DCCR &= ~BIT(0);
 
     /*************read presave tune value*******/
 #if USE_PRESAVE_TUNE
+    u32 tunevalue_ok_value = 0;
     u32 pre_save_tunevalue = 0;
     u32 crc_check = 0;
 
-    _rtcRamRead(HAL_TUNEVALUE_ADDR, (u8 *)&pre_save_tunevalue, 4);
-    _rtcRamRead(HAL_CRCCHECK_ADDR, (u8 *)&crc_check, 4);
+    _rtcRamRead(SDRAM_TUNEVALUE_OK_ADDR, (u8 *)&tunevalue_ok_value, 4);
+    _rtcRamRead(SDRAM_TUNEVALUE_ADDR, (u8 *)&pre_save_tunevalue, 4);
+    _rtcRamRead(SDRAM_CRCCHECK_ADDR, (u8 *)&crc_check, 4);
 
-    // pre_save_tunevalue = 0;
-    if (pre_save_tunevalue)
+    if (SDRAM_TUNEVALUE_OK_VALUE == tunevalue_ok_value)
     {
-        if (crc_check == crc_cal(pre_save_tunevalue))
+        if (pre_save_tunevalue)
         {
-            if (sdr_tune_source == CLK_TUN)
+            if (crc_check == crc_cal(pre_save_tunevalue))
             {
-                CLKTUN = pre_save_tunevalue; // 11_7: OUTPUT, 4_0: INPUT
+                if (sdr_tune_source == CLK_TUN)
+                {
+                    CLKTUN = pre_save_tunevalue; // 11_7: OUTPUT, 4_0: INPUT
+                }
+                else
+                {
+                    DLLCON = pre_save_tunevalue;
+                }
+                my_putchar('b');
+                goto TUNE_END;
             }
-            else
-            {
-                DLLCON = pre_save_tunevalue;
-            }
-            my_putchar('b');
-            goto TUNE_END;
+            // my_putchar('d');
         }
-        // my_putchar('d');
     }
 #endif
+
     u32 cnty = 0, tuny = 0xffffffff;
     u32 cntx = 0, tunx = 0xffffffff;
     u32 cnty_temp = 0;
@@ -1248,13 +1467,9 @@ __except void sdram_clock_tune(void) // clktun
 
     WTD_DIS();
 
-    uint32_t tune_cnt = 16;
+    uint32_t tune_cnt = 3;
     sdram_tuning_check_init();
-#if SDRAM_SIZE == SDRAM_SIZE_8M
     uint32_t sdrsize_shf = 23; // 8M
-#else
-    uint32_t sdrsize_shf = 21; // 2M
-#endif
     uint32_t i_max, j_max;
     if (sdr_tune_source == CLK_TUN)
     {
@@ -1266,7 +1481,7 @@ __except void sdram_clock_tune(void) // clktun
         i_max = ARRAY_NUM(tune_tab_1_dll);
         j_max = ARRAY_NUM(tune_tab_2_dll);
     }
-begain: // 如果select()报错,将可能重新开始tune
+begain: //?|????select()??￥é”?,?°???ˉè??é???–°??€?§?tune
 
     if (sdr_tune_source == CLK_TUN)
         CLKTUN |= CLKTUN_CONST;
@@ -1293,7 +1508,7 @@ begain: // 如果select()报错,将可能重新开始tune
         // sdram_init();
         for (cntx = 0,
             tunx = 0xffffffff,
-            cnty_temp = 0, // 用于给[11:7]的计数做依据
+            cnty_temp = 0, //?”¨?o????[11:7]???è????°?????????
              j = 0;
              j < j_max;
              j++)
@@ -1309,8 +1524,8 @@ begain: // 如果select()报错,将可能重新开始tune
                 DLLCON |= (tune_tab_1_dll[i] << DLLTUN_CH1_POS) | (tune_tab_2_dll[j] << DLLTUN_CH2_POS);
             }
             WTD_DIS();
+            // exact_delay(r1,r2,5);
             exception_delay(5);
-
             // delay(5);
             sdram_init();
 
@@ -1329,7 +1544,7 @@ begain: // 如果select()报错,将可能重新开始tune
                     }
                 }
 
-                cnty_temp++; // 表示小循环tune到过值
+                cnty_temp++; // è?¨?¤o?°???a??ˉtune??°è???€?
                 cntx++;
             }
             else
@@ -1352,7 +1567,7 @@ begain: // 如果select()报错,将可能重新开始tune
             // b_bic_orr(WDTCON,0,(5<<16));  //clear wdt
         }
 
-        // 补充对末尾的检查
+        // è?￥?……?ˉ1????°?????￡€???
         if (cntx != 0)
         {
             cnty_temp++;
@@ -1362,7 +1577,7 @@ begain: // 如果select()报错,将可能重新开始tune
             tune_values[i].remain--;
         }
 
-        if (cnty_temp) // 表示前边的小循环有tune到过正确的值
+        if (cnty_temp) // è?¨?¤o?‰?è?1????°???a??ˉ??‰tune??°è???-￡???????€?
         {
             if (tuny == 0xffffffff)
             {
@@ -1416,10 +1631,6 @@ begain: // 如果select()报错,将可能重新开始tune
             goto begain;
         }
     }
-    else
-    {
-        save_tunevale = 1; // 0: not save tune value, 1: save tune value
-    }
 
     if (sdr_tune_source == CLK_TUN)
     {
@@ -1430,7 +1641,6 @@ begain: // 如果select()报错,将可能重新开始tune
         DLLCON &= ~DLLTUN_CONST;
         DLLCON |= (tune_tab_1_dll[by_id] << DLLTUN_CH1_POS) | (tune_tab_2_dll[bx_id] << DLLTUN_CH2_POS);
     }
-    // u32 tunevalue = 0, tune_crc = 0;
 #if USE_PRESAVE_TUNE
     pre_save_tunevalue = 0;
     crc_check = 0;
@@ -1446,23 +1656,24 @@ begain: // 如果select()报错,将可能重新开始tune
         }
         crc_check = crc_cal(pre_save_tunevalue);
     }
-    _rtcRamWrite(HAL_TUNEVALUE_ADDR, (u8 *)&pre_save_tunevalue, 4); // save tune value
-    _rtcRamWrite(HAL_CRCCHECK_ADDR, (u8 *)&crc_check, 4);           // save tune value
+    _rtcRamWrite(SDRAM_TUNEVALUE_ADDR, (u8 *)&pre_save_tunevalue, 4); // save tune value
+    _rtcRamWrite(SDRAM_CRCCHECK_ADDR, (u8 *)&crc_check, 4);           // save tune value
 TUNE_END:
 #endif
+
+    // exact_delay(r1,r2,100);
     exception_delay(100);
     WTD_DIS();
     // delay(100);
     sdram_init();
 
+    // exact_delay(r1,r2,100);
     exception_delay(100);
     WTD_DIS();
     // delay(100);
-#if 1 // DLL打开前打开后测量1次
-    //	vbg_adc1 = adcGetChannel(11);//adc0
-    //	vbg_param = vbg_adc1 * vbg_param / vbg_adc0;
-    //	vbg_param_adc = vbg_param *1024/3300;
-
+#if 1                             // DLL打开前打开后测量1次
+    vbg_adc1 = adcGetChannel(11); // adc0
+    vbg_param = vbg_adc1 * vbg_param / vbg_adc0;
 #endif
 }
 
@@ -1478,7 +1689,7 @@ __except void exception(u32 except_id)
     exception_uart_puts(str3);
     if (0x30 == (except_id & 0xff))
         exception_uart_puts(str5);
-    // 检测VDDRTC
+    //?￡€?μ?VDDRTC
     int i = 3;
     u8 rtc0 = 0;
     u32 Abg = 0, Artc = 0, Vrtc = 0;
@@ -1494,6 +1705,7 @@ __except void exception(u32 except_id)
     while (i--)
     {
         ADCCON = (1 << 4) | (9);
+        // exception_delay(10);
         exception_delay(10);
         ADCCON |= (1 << 7);
         while (ADCCON & (1 << 6))
@@ -1501,6 +1713,7 @@ __except void exception(u32 except_id)
         Artc += ADCDAT & 0x3ff;
 
         ADCCON = (1 << 4) | (11);
+        // exception_delay(10);
         exception_delay(10);
         ADCCON |= (1 << 7);
         while (ADCCON & (1 << 6))
@@ -1524,24 +1737,24 @@ __except void exception(u32 except_id)
         goto RESET;
     }
     exception_uart_puts(str4);
-    // 如果VDDRTC过低
-    // 关闭时钟
+    //?|????VDDRTCè?????
+    //?…3é—-?—?é’?
     PCON0 |= (0xfff << 20) | (0xff << 9);
 
-    // 关闭后录电源
+    //?…3é—-???????”μ?o?
     PEFMAP &= ~(1 << 1);
     PEDIR &= ~(1 << 1);
     PORTE &= ~(1 << 1);
 
-    // 关闭LCD背光
+    //?…3é—-LCDè???…‰
     PAFMAP &= ~(1 << 8);
     PADIR &= ~(1 << 8);
     PORTA &= ~(1 << 8);
 
-    // 关闭SENSOR电源
+    //?…3é—-SENSOR?”μ?o?
     // LDOCON &=~((1<<15)|(1<<7)|(1<<3));
     LDOCON &= ~((1 << 21) | (1 << 12) | (1 << 5));
-    // 关闭电源
+    //?…3é—-?”μ?o?
     while (1)
     {
         PAFMAP &= ~(3 << 6);
@@ -1549,14 +1762,14 @@ __except void exception(u32 except_id)
         PORTA &= ~(3 << 6); // gsensor i2c output low
 
         // close gsensor power
-        // exception_irtc_write(IRTCON0_WR_CMD,(1<<4)|(1<<1));//寄存器值修改，IRTCON4 bit5?
+        // exception_irtc_write(IRTCON0_WR_CMD,(1<<4)|(1<<1));//?ˉ??-???¨?€?????”1???IRTCON4 bit5?
         exception_irtc_write(IRTCON5_WR_CMD, (7 << 5)); // clean wko/wki0/wki1 weakup pending
         exception_irtc_write(IRTCON4_WR_CMD, (1 << 1)); // wko output 0
     }
 RESET:
     while (1)
         ;
-    // 看门狗复位
+    //???é—¨??—?¤????
     WDTCON = 0;
     while (1)
     {
@@ -1564,7 +1777,7 @@ RESET:
     }
 }
 
-// 触发exception
+// è§|??‘exception
 __except void exception_trigger(void)
 {
     asm(".ascii \"01234\"");

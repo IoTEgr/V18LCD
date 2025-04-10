@@ -702,8 +702,8 @@ static void H63P_rotate(u32 r)
 	//  for(i=0;i<sizeof(iicbuf)/2;i++)
 	//  	sensor_iic_write((u8 *)&iicbuf[i][0]);
 
-	u8 flip = r & 0x02;
-	u8 mirror = r & 0x01;
+	u8 flip = r & 0x01;
+	u8 mirror = r & 0x00;
 	r = ((mirror << 1) | flip) << 4;
 	u8 i, iicbuf[][2] = {
 			  {0x12, r},
